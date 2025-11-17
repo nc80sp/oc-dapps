@@ -10,7 +10,7 @@
     <h1>🎫 有料アクセスページ</h1>
     <p id="status">ウォレットを接続してください。</p>
     <button id="connectButton">MetaMask接続</button>
-    <button id="payButton" style="display:none;">0.001 ETH を支払う</button>
+    <button id="payButton" style="display:none;"></button>
 
     <!-- ✅ ethers.js v5 を正しく読み込む -->
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
@@ -22,6 +22,15 @@
             "function payForPage(uint256) payable",
             "function checkAccess(address,uint256) view returns (bool)",
             "function withdraw() onlyOwner"
+        ];
+
+        //各ページの料金
+        const PagePrice = [
+            0.005,
+            0.003,
+            0.002,
+            0.001,
+            0.01
         ];
 
         let provider, signer, contract, userAddress, pageId;
@@ -52,6 +61,7 @@
         async function checkAccess() {
             const hasAccess = await contract.checkAccess(userAddress, pageId);
             const payButton = document.getElementById("payButton");
+            payButton.innerHTML = PagePrice[pageId - 1] + " SepoliaETH を支払う";
 
             if (hasAccess) {
                 document.getElementById("status").textContent = "✅ 支払い済みです！ページに移動します...";
@@ -63,7 +73,7 @@
         }
 
         async function payForAccess() {
-            const price = ethers.utils.parseEther("0.001");
+            const price = ethers.utils.parseEther(PagePrice[pageId - 1]);
             const tx = await contract.payForPage(pageId, { value: price });
             document.getElementById("status").textContent = "⏳ 支払い処理中...";
             await tx.wait();
