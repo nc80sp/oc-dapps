@@ -1,0 +1,23 @@
+
+services:
+  hardhat:
+    container_name: hhat
+    build: ./hardhat/docker
+    ports:
+      - 8545:8545
+    volumes:
+      - ./hardhat/src:/hardhat
+    tty: true
+    environment:
+      - TZ=Asia/Tokyo
+
+  webfront:
+    container_name: front
+    build: ./webfront/docker
+    ports:
+      - 8080:80
+    volumes:
+      - ./webfront/src:/usr/local/apache2/htdocs/
+    environment:
+      - TZ=Asia/Tokyo
+    

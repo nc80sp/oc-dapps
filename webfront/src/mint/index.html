@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>MyNFT Mint Page</title>
+</head>
+
+<body>
+	<h1>My NFT</h1>
+	<button id="connect">Connect Wallet</button>
+	<button id="mint">Mint NFT</button>
+
+	<!-- Ethers.js -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.8.1/ethers.umd.min.js"></script>
+	<script>
+		const contractAddress = "あなたのコントラクトアドレスをここに入れる";
+
+		// ここに ABI を貼る（デプロイ後に得られる）
+		const contractABI = [
+			"function mint() external",
+			"function ownerOf(uint256 tokenId) view returns (address)"
+		];
+
+		let signer;
+		let contract;
+
+		// ウォレット接続
+		document.getElementById("connect").onclick = async () => {
+			if (!window.ethereum) {
+				alert("Metamask をインストールしてください");
+				return;
+			}
+			const provider = new ethers.BrowserProvider(window.ethereum);
+			await provider.send("eth_requestAccounts", []);
+			signer = await provider.getSigner();
+			contract = new ethers.Contract(contractAddress, contractABI, signer);
+			alert("Wallet Connected: " + await signer.getAddress());
+		};
+
+		// mint ボタン
+		document.getElementById("mint").onclick = async () => {
+			if (!contract) {
+				alert("先に Connect Wallet を押してね");
+				return;
+			}
+			const tx = await contract.mint();
+			alert("Minting... トランザクション送信中");
+			await tx.wait();
+			alert("Mint 完了！");
+		};
+	</script>
+</body>
+
+</html>
