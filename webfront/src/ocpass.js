@@ -1,8 +1,9 @@
-const CONTRACT_ADDRESS = "0xB4a2099e77eB9cF87Af08b5e828FD0d555ea92b2"; // あなたのコントラクトアドレスに置き換え
+const CONTRACT_ADDRESS = "0x4594F930D686157e5A7927Aa06Fa3969ea267074"; // あなたのコントラクトアドレスに置き換え
 const ABI = [
-    "function mintCert()",
-    "function hasNFT() view returns (bool)",
-    "function getMintNum() view returns (uint256)",
+    "function setMetadataURI(uint256,string memory uri) onlyOwner",
+    "function mintNFT(uint256)",
+    "function hasNFT(uint256) view returns (bool)",
+    "function getMintNum(uint256) view returns (uint256)",
     "function claimReward()",
     "function checkClaimed(address user) view returns (bool)",
     "function setPageFee(uint256 pageId, uint256 fee) onlyOwner",
@@ -14,7 +15,7 @@ const ABI = [
     "function getContractBalance() view onlyOwner returns (uint256)"
 ];
 
-let provider, signer, contract, userAddress;
+let provider, signer, contract, userAddress, isClaimed = false;
 
 // ウォレット接続
 async function connectWallet() {
@@ -62,12 +63,53 @@ async function withdrawAll() {
     await contract.withdrawAll();
 }
 
+// ページ料金の取得
 async function getPageFee(pageId) {
     let value = await contract.getPageFee(pageId);
     return ethers.utils.formatEther(value);
 }
 
+// ページ料金の設定
 async function setPageFee(pageId, fee) {
     const value = ethers.utils.parseEther(fee);
     await contract.setPageFee(pageId, value);
+}
+
+// NFTメタデータの設定
+async function setMetadataURI(typeId, uri) {
+    await contract.setMetadataURI(typeId, uri);
+}
+
+// NFTの発行
+async function mintNFT(typeId) {
+    await contract.mintNFT(typeId);
+}
+
+// NFTの所持確認
+async function hasNFT(typeId) {
+    return await contract.hasNFT(typeId);
+}
+
+// NFT発行数の確認
+async function getMintNum(typeId) {
+    return await contract.getMintNum(typeId);
+}
+
+// 報酬付与確認
+async function checkClaimed() {
+    isClaimed = await contract.checkClaimed(userAddress);
+}
+
+// 報酬付与
+async function claimedReward() {
+    if (!isClaimed) {
+        const tx = await contract.claimReward();
+        await tx.wait();
+        // 報酬付与完了
+        isClaimed = true;
+        return true;
+    } else {
+        // 報酬付与は付与済み
+        return false;
+    }
 }

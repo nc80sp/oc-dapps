@@ -1,54 +1,122 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="ja">
 
 <head>
-	<meta charset="utf-8">
-	<title>MyNFT Mint Page</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>オープンキャンパス参加証 NFT ミンター</title>
+	<style>
+		body {
+			font-family: system-ui, -apple-system, Segoe UI, Roboto, "ヒラギノ角ゴ ProN W3", "Hiragino Kaku Gothic ProN", Meiryo, Arial;
+			margin: 24px;
+			background: #0b0b12;
+			color: #e6eefc
+		}
+
+		h1 {
+			font-size: 20px;
+			margin-bottom: 8px
+		}
+
+		.container {
+			display: flex;
+			gap: 20px;
+			align-items: flex-start
+		}
+
+		.left {
+			width: 420px
+		}
+
+		canvas {
+			background: #05050a;
+			border-radius: 12px;
+			box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+			display: block
+		}
+
+		.controls {
+			margin-top: 12px;
+			display: grid;
+			gap: 8px
+		}
+
+		input[type=text],
+		input[type=file],
+		button,
+		select {
+			padding: 8px;
+			border-radius: 8px;
+			border: 1px solid rgba(255, 255, 255, 0.08);
+			background: rgba(255, 255, 255, 0.02);
+			color: inherit
+		}
+
+		button {
+			cursor: pointer
+		}
+
+		.small {
+			font-size: 13px;
+			color: #9fb0ff
+		}
+
+		.note {
+			font-size: 13px;
+			color: #a8b6db;
+			margin-top: 6px
+		}
+
+		label {
+			font-size: 13px;
+			color: #9fb0ff
+		}
+
+		.right {
+			flex: 1;
+			min-width: 300px
+		}
+
+		textarea {
+			width: 100%;
+			height: 160px;
+			padding: 8px;
+			border-radius: 8px;
+			background: rgba(255, 255, 255, 0.02);
+			border: 1px solid rgba(255, 255, 255, 0.04);
+			color: inherit
+		}
+
+		.row {
+			display: flex;
+			gap: 8px
+		}
+	</style>
 </head>
 
 <body>
-	<h1>My NFT</h1>
-	<button id="connect">Connect Wallet</button>
-	<button id="mint">Mint NFT</button>
+	<h1>オープンキャンパス参加証 NFT発行ページ</h1>
+	<p id="msg"></p>
+	<div style="margin-top:20px;">
+		<button id="mint" style="margin-top:20px; font-size:20px; padding:10px 30px;">🎉 参加証NFT をミントする</button>
+	</div>
 
-	<!-- Ethers.js -->
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.8.1/ethers.umd.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+	<script src="../ocpass.js"></script>
 	<script>
-		const contractAddress = "あなたのコントラクトアドレスをここに入れる";
 
-		// ここに ABI を貼る（デプロイ後に得られる）
-		const contractABI = [
-			"function mint() external",
-			"function ownerOf(uint256 tokenId) view returns (address)"
-		];
+		document.getElementById('mint').addEventListener('click', clickMint);
 
-		let signer;
-		let contract;
-
-		// ウォレット接続
-		document.getElementById("connect").onclick = async () => {
-			if (!window.ethereum) {
-				alert("Metamask をインストールしてください");
-				return;
+		async function clickMint() {
+			document.getElementById('msg').value = "接続中...";
+			await connectWallet();
+			if (await hasNFT(1)) {
+				document.getElementById('msg').value = "すでに参加証NFTを持っています。";
+			} else {
+				await mintNFT(1);
+				document.getElementById('msg').value = "NFT発行が完了しました。";
 			}
-			const provider = new ethers.BrowserProvider(window.ethereum);
-			await provider.send("eth_requestAccounts", []);
-			signer = await provider.getSigner();
-			contract = new ethers.Contract(contractAddress, contractABI, signer);
-			alert("Wallet Connected: " + await signer.getAddress());
-		};
-
-		// mint ボタン
-		document.getElementById("mint").onclick = async () => {
-			if (!contract) {
-				alert("先に Connect Wallet を押してね");
-				return;
-			}
-			const tx = await contract.mint();
-			alert("Minting... トランザクション送信中");
-			await tx.wait();
-			alert("Mint 完了！");
-		};
+		}
 	</script>
 </body>
 

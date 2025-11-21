@@ -5,11 +5,17 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract OpenCampusPass is ERC721URIStorage, Ownable {
-    // 学生証NFTのトークンID
-    uint256 private _nextTokenId;
+    // NFTのトークンID
+    uint256 private _nextTokenId = 1;
 
-    // クイズの報酬額
-    uint256 public rewardQuiz = 0.05 ether;
+    // tokenId → NFTタイプ（1,2,3など）
+    mapping(uint256 => uint256) public tokenType;
+
+    // NFTタイプ → メタデータURL
+    mapping(uint256 => string) public metadataURI;
+
+    // 報酬額
+    uint256 public reward = 0.05 ether;
 
     // ユーザーがクリア済みのクイズ
     mapping(address => bool) public hasClaimed;
@@ -26,44 +32,59 @@ contract OpenCampusPass is ERC721URIStorage, Ownable {
     // コントラクトにETHを送金して報酬プールを作る
     receive() external payable {}
 
-    // 学生証NFTのメタファイルのURL返却 (固定URLにしておく)
-    function _baseURI() internal pure override returns (string memory) {
-        return "https://example.com/metadata/fixed.json";
+    // 管理者が NFT タイプごとのメタデータURLを設定
+    function setMetadataURI(
+        uint256 typeId,
+        string memory uri
+    ) external onlyOwner {
+        metadataURI[typeId] = uri;
     }
 
-    // 学生証NFTの発行
-    function mintCert() external {
+    // NFTの発行
+    function mintNFT(uint256 typeId) external {
         uint256 tokenId = _nextTokenId;
         _nextTokenId++;
         _safeMint(msg.sender, tokenId);
+
+        // NFT種類を記録
+        tokenType[tokenId] = typeId;
+        // URI設定
+        _setTokenURI(tokenId, metadataURI[typeId]);
     }
 
-    // 学生証NFTの所持確認
-    function hasNFT() external view returns (bool) {
-        uint256 num = balanceOf(msg.sender);
-        return num > 0;
+    // 🔍 特定のNFTタイプを持っているか確認
+    function hasNFT(uint256 typeId) external view returns (bool) {
+        for (uint256 i = 1; i < _nextTokenId; i++) {
+            if (ownerOf(i) == msg.sender && tokenType[i] == typeId) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    // 学生証の発行数
-    function getMintNum() external view returns (uint256) {
-        return _nextTokenId;
+    // NFTの発行数
+    function getMintNum(uint256 typeId) external view returns (uint256) {
+        uint256 num = 0;
+        for (uint256 i = 1; i < _nextTokenId; i++) {
+            if (tokenType[i] == typeId) {
+                num++;
+            }
+        }
+        return num;
     }
 
-    // クイズに正解した場合の報酬付与
+    // 報酬付与
     function claimReward() external {
         require(!hasClaimed[msg.sender], "Already claimed");
-        require(rewardQuiz > 0, "Quiz has no reward");
-        require(
-            address(this).balance >= rewardQuiz,
-            "Not enough ETH in contract"
-        );
+        require(reward > 0, "Quiz has no reward");
+        require(address(this).balance >= reward, "Not enough ETH in contract");
 
         // 報酬支払いと記録
         hasClaimed[msg.sender] = true;
-        payable(msg.sender).transfer(rewardQuiz);
+        payable(msg.sender).transfer(reward);
     }
 
-    // クイズ報酬を受け取ったかどうか
+    // 報酬を受け取ったかどうか
     function checkClaimed(address user) external view returns (bool) {
         return hasClaimed[user];
     }

@@ -3,68 +3,93 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>クイズ</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>クイズアプリ</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             padding: 20px;
-            background: #f9f9f9;
-            max-width: 600px;
-            margin: auto;
+            background: #03040f;
+            color: #00eaff;
+            text-shadow: 0 0 5px #00eaff;
+        }
+
+        h1 {
+            text-align: center;
+            color: #00eaff;
+            text-shadow: 0 0 10px #00eaff;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #00eaff;
+            text-shadow: 0 0 10px #00eaff;
+            margin-bottom: 10px;
+        }
+
+        #startBtn {
+            display: block;
+            margin: 0 auto;
+            padding: 12px 30px;
+            font-size: 18px;
+            background: transparent;
+            border: 2px solid #00eaff;
+            color: #00eaff;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 0 15px #00eaff;
+        }
+
+        #startBtn:hover {
+            background: #00eaff;
+            color: #03040f;
+            box-shadow: 0 0 20px #00eaff;
         }
 
         #quiz-box {
-            background: #fff;
+            display: none;
+            margin-top: 30px;
             padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border: 2px solid #00eaff;
+            border-radius: 15px;
+            background: rgba(0, 20, 40, 0.5);
+            box-shadow: 0 0 20px #00eaff;
         }
 
-        .choice {
-            display: block;
-            width: 100%;
+        #question {
+            font-size: 22px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px #00eaff;
+        }
+
+        .option {
+            margin: 10px 0;
             padding: 12px;
-            margin: 8px 0;
-            background: #e0e0e0;
+            border: 1px solid #00eaff;
             border-radius: 8px;
-            border: none;
-            font-size: 16px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: 0.25s;
+            background: rgba(0, 30, 60, 0.4);
+            box-shadow: 0 0 10px #00eaff33;
         }
 
-        .choice:hover {
-            background: #d0d0d0;
+        .option:hover {
+            background: #00eaff;
+            color: #03040f;
+            text-shadow: none;
+            box-shadow: 0 0 20px #00eaff;
         }
 
         #result {
-            font-size: 20px;
-            margin-top: 20px;
+            font-size: 24px;
             font-weight: bold;
             text-align: center;
-        }
-
-        #reward {
-            font-size: 20px;
-            margin-top: 20px;
-            font-weight: bold;
-            color: red;
-            text-align: center;
-        }
-
-        #restart {
-            margin-top: 20px;
-            padding: 12px 20px;
-            font-size: 18px;
-            background: #4caf50;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
+            margin-top: 30px;
+            color: #00eaff;
+            text-shadow: 0 0 15px #00eaff;
             display: none;
-            width: 100%;
-            cursor: pointer;
         }
     </style>
 </head>
@@ -72,118 +97,100 @@
 <body>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <script src="../ocpass.js"></script>
-    <script src="quiz_pay.js"></script>
-    <div id="content">
 
-        <h2>クイズに挑戦！全問正解で [SepoliaETH 0.05] GET！</h2>
+    <h1>『サイバーズOC試験』<br>
+        全問正解で【試験合格証】NFTをゲット！</h1>
+    <button id="startBtn">開始</button>
 
-        <div id="quiz-box">
-            <h3 id="question"></h3>
-            <div id="choices"></div>
-        </div>
-
-        <p id="result"></p>
-        <p id="reward"></p>
-        <button id="restart">もう一度プレイ</button>
+    <div id="quiz-box">
+        <div id="question"></div>
+        <div id="options"></div>
     </div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", async () => {
-            await connectWallet();
-            await checkClaimed();
-        });
+    <div id="result"></div>
+    <div id="reward"></div>
 
-        // ---------- クイズデータ ----------
-        const quizData = [
+    <script>
+        const quizzes = [
             {
-                question: "イーサリアムの通貨単位はどれ？",
-                choices: ["BTC", "ETH", "SOL", "JPY"],
+                question: "ブロックチェーンの特徴は？",
+                options: ["中央集権", "改ざんが困難", "1つの企業が管理"],
                 answer: 1
             },
             {
-                question: "ブロックチェーンの特徴は？",
-                choices: ["中央集権的", "改ざんしやすい", "分散型で改ざんしにくい", "速度が超高速"],
-                answer: 2
+                question: "NFTの正しい説明は？",
+                options: ["コピー可能なトークン", "唯一性を持つトークン", "仮想通貨の一種ではない"],
+                answer: 1
             },
             {
-                question: "NFTとは何の略？",
-                choices: ["Non-Fiction Token", "New Future Tech", "Non-Fungible Token", "Nano File Transfer"],
-                answer: 2
+                question: "Ethereumのネイティブ通貨は？",
+                options: ["BTC", "ETH", "SOL"],
+                answer: 1
             }
         ];
 
-        let currentIndex = 0;
-        let correctCount = 0;
+        let current = 0;
+        let score = 0;
 
-        // ---------- クイズを表示 ----------
+        const startBtn = document.getElementById("startBtn");
+        const quizBox = document.getElementById("quiz-box");
+        const questionEl = document.getElementById("question");
+        const optionsEl = document.getElementById("options");
+        const resultEl = document.getElementById("result");
+
+        startBtn.addEventListener("click", startQuiz);
+
+        function startQuiz() {
+            startBtn.style.display = "none";
+            quizBox.style.display = "block";
+            current = 0;
+            score = 0;
+            showQuiz();
+        }
+
         function showQuiz() {
-            const q = quizData[currentIndex];
+            if (current >= quizzes.length) {
+                finishQuiz();
+                return;
+            }
 
-            document.getElementById("question").textContent = q.question;
+            const q = quizzes[current];
+            questionEl.textContent = `${current + 1}問目：${q.question}`;
+            optionsEl.innerHTML = "";
 
-            const choicesDiv = document.getElementById("choices");
-            choicesDiv.innerHTML = "";
-
-            q.choices.forEach((text, i) => {
-                const btn = document.createElement("button");
-                btn.className = "choice";
-                btn.textContent = text;
-                btn.onclick = () => answer(i);
-                choicesDiv.appendChild(btn);
+            q.options.forEach((opt, index) => {
+                const div = document.createElement("div");
+                div.className = "option";
+                div.textContent = opt;
+                div.onclick = () => choose(index);
+                optionsEl.appendChild(div);
             });
         }
 
-        // ---------- 回答処理 ----------
-        function answer(choiceIndex) {
-            const q = quizData[currentIndex];
-            if (choiceIndex === q.answer) {
-                correctCount++;
+        function choose(index) {
+            if (index === quizzes[current].answer) {
+                score++;
             }
-
-            currentIndex++;
-
-            // 最終問題まで進んだ？
-            if (currentIndex >= quizData.length) {
-                finishQuiz();
-            } else {
-                showQuiz();
-            }
+            current++;
+            showQuiz();
         }
 
-        // ---------- 結果表示 ----------
         async function finishQuiz() {
-            document.getElementById("quiz-box").style.display = "none";
-            document.getElementById("result").textContent =
-                `終了！ 正解数：${correctCount} / ${quizData.length}`;
-
-            if (correctCount >= quizData.length) {
+            quizBox.style.display = "none";
+            resultEl.style.display = "block";
+            resultEl.textContent = `結果：${quizzes.length}問中 ${score}問正解でした！`;
+            if (quizzes.length <= score) {
                 //満点の場合
-                document.getElementById("reward").textContent = "報酬の確認中...";
-                if (await claimedReward()) {
-                    document.getElementById("reward").textContent = "報酬 0.05ETH をGETしました！";
+                document.getElementById("reward").textContent = "NFTの確認中...";
+                if (await hasNFT(2)) {
+                    document.getElementById("reward").textContent = "NFTは受け取り済みです";
                 } else {
-                    document.getElementById("reward").textContent = "報酬は受け取り済みです";
+                    await mintNFT(2);
+                    document.getElementById("reward").textContent = "試験合格証NFT をGETしました！";
                 }
             }
-
-            document.getElementById("restart").style.display = "block";
         }
-
-        // ---------- リスタート ----------
-        document.getElementById("restart").onclick = () => {
-            currentIndex = 0;
-            correctCount = 0;
-            document.getElementById("quiz-box").style.display = "block";
-            document.getElementById("restart").style.display = "none";
-            document.getElementById("result").textContent = "";
-            document.getElementById("reward").textContent = "";
-            showQuiz();
-        };
-
-        // 最初の問題を表示
-        showQuiz();
     </script>
-
 </body>
 
 </html>
