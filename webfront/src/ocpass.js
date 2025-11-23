@@ -15,13 +15,18 @@ const ABI = [
     "function getContractBalance() view onlyOwner returns (uint256)"
 ];
 
+const NFT_TYPE = Object.freeze({
+    PARTICIPATION: 1,
+    COMPLETE: 2,
+});
+
 let provider, signer, contract, userAddress, isClaimed = false;
 
 // ウォレット接続
-async function connectWallet() {
+async function connectWallet(checkNFT) {
     if (!window.ethereum) {
         alert("MetaMaskが見つかりません。インストールしてください。");
-        return;
+        return false;
     }
 
     provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -30,6 +35,14 @@ async function connectWallet() {
     userAddress = await signer.getAddress();
 
     contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+
+    if (checkNFT) {
+        if (await contract.hasNFT(NFT_TYPE.PARTICIPATION) == false) {
+            alert("参加証NFTを所持していないため、アクセスできません。");
+            return false;
+        }
+    }
+    return true;
 }
 
 // 残高取得
@@ -82,7 +95,8 @@ async function setMetadataURI(typeId, uri) {
 
 // NFTの発行
 async function mintNFT(typeId) {
-    await contract.mintNFT(typeId);
+    const tx = await contract.mintNFT(typeId);
+    await tx.wait();
 }
 
 // NFTの所持確認
@@ -98,6 +112,7 @@ async function getMintNum(typeId) {
 // 報酬付与確認
 async function checkClaimed() {
     isClaimed = await contract.checkClaimed(userAddress);
+    return isClaimed;
 }
 
 // 報酬付与

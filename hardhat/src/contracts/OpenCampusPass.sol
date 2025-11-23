@@ -52,7 +52,7 @@ contract OpenCampusPass is ERC721URIStorage, Ownable {
         _setTokenURI(tokenId, metadataURI[typeId]);
     }
 
-    // 🔍 特定のNFTタイプを持っているか確認
+    // 特定のNFTタイプを持っているか確認
     function hasNFT(uint256 typeId) external view returns (bool) {
         for (uint256 i = 1; i < _nextTokenId; i++) {
             if (ownerOf(i) == msg.sender && tokenType[i] == typeId) {

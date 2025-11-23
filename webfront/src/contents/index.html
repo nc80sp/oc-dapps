@@ -20,7 +20,11 @@
         let pageId, fee;
 
         async function connect() {
-            await connectWallet();
+            let result = await connectWallet(true);
+            if (!result) {
+                document.getElementById("status").textContent = `接続に失敗しました`;
+                return;
+            }
 
             const params = new URLSearchParams(window.location.search);
             pageId = params.get("id");
@@ -46,11 +50,17 @@
         }
 
         async function payForAccess() {
-            const price = ethers.utils.parseEther(fee);
-            const tx = await contract.payForPage(pageId, { value: price });
-            document.getElementById("status").textContent = "⏳ 支払い処理中...";
-            payButton.style.display = "none";
-            await tx.wait();
+            try {
+                const price = ethers.utils.parseEther(fee);
+                const tx = await contract.payForPage(pageId, { value: price });
+                document.getElementById("status").textContent = "⏳ 支払い処理中...";
+                payButton.style.display = "none";
+                await tx.wait();
+            } catch (e) {
+                document.getElementById("status").textContent = "❌ 支払いに失敗しました。残金を確認してください。";
+                return;
+            }
+
             document.getElementById("status").textContent = "✅ 支払いが完了しました！ページに移動します...";
             redirectToFolder();
         }

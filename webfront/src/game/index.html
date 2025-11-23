@@ -35,7 +35,8 @@
             line-height: 1.6;
         }
 
-        #startButton {
+        #startButton,
+        #replayButton {
             padding: 20px 50px;
             font-size: 26px;
             border: none;
@@ -55,12 +56,12 @@
 
 <body>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-    <script src="../../ocpass.js"></script>
-    <script src="../check_pay.js"></script>
-    <p id="loading" style="margin: 10px; color: rgb(255, 255, 255);"> 読み込み中...</p>
+    <script src="../ocpass.js"></script>
+    <p id="msg" style="margin: 10px; color: rgb(255, 255, 255);"> 読み込み中...</p>
     <div id="content" style="display: none;">
         <div id="startScreen">
             <h1>Snake Game</h1>
+            <strong id="reward">スコア10以上で <span style="color: rgb(255, 0, 0);">0.05 SepoliaETH</span> をゲット！</strong><br>
             <div class="desc">
                 <strong>【操作方法】</strong><br>
                 PC：矢印キー または WASD で移動<br>
@@ -70,18 +71,47 @@
             <button id="startButton">ゲーム開始</button>
         </div>
 
+        <div id="endScreen" style="text-align: center; display: none;">
+            <h1>ゲームオーバー</h1>
+            <h1 id="resultScore">スコア:10</h1><br>
+            <h2 id="resultText" style="display: none;">
+                スコア10を超えたため、<br>
+                <span style="color: rgb(255, 0, 0);">0.05 SepoliaETH</span> を獲得！
+            </h2>
+            <button id="replayButton">もう一度プレイ</button>
+        </div>
+
         <canvas id="game" width="400" height="400"></canvas>
-        <div id="score">Score: 0</div>
+        <div id="score">スコア: 0</div>
     </div>
     <script>
         const canvas = document.getElementById("game");
         const ctx = canvas.getContext("2d");
         const scoreText = document.getElementById("score");
         const startScreen = document.getElementById("startScreen");
+        const endScreen = document.getElementById("endScreen");
+        const resultScore = document.getElementById("resultScore");
+        const resultText = document.getElementById("resultText");
+        const replayButton = document.getElementById("replayButton");
 
         const grid = 20;
         let snake, dx, dy, food, score, speed;
         let running = false;
+        let claimed = false;
+
+        async function connect() {
+            let result = await connectWallet(true);
+            if (!result) {
+                document.getElementById("status").textContent = `接続に失敗しました`;
+                return;
+            }
+            //接続後にコンテンツ表示
+            document.getElementById("msg").innerHTML = "";
+            document.getElementById("content").style.display = "block";
+        }
+        document.addEventListener("DOMContentLoaded", async () => {
+            connect();
+        });
 
         function initGame() {
             snake = [{ x: 200, y: 200 }];
@@ -90,7 +120,7 @@
             food = randomFood();
             score = 0;
             speed = 100;
-            scoreText.textContent = "Score: 0";
+            scoreText.textContent = "スコア: 0";
         }
 
         function randomFood() {
@@ -102,8 +132,10 @@
 
         function startGame() {
             startScreen.style.display = "none";
+            endScreen.style.display = "none";
             canvas.style.display = "block";
             scoreText.style.display = "block";
+            resultText.style.display = "none";
             initGame();
             running = true;
             gameLoop();
@@ -139,7 +171,7 @@
                 // 餌
                 if (head.x === food.x && head.y === food.y) {
                     score++;
-                    scoreText.textContent = "Score: " + score;
+                    scoreText.textContent = "スコア: " + score;
                     food = randomFood();
                     speed = Math.max(40, speed - 2);
                 } else {
@@ -166,12 +198,25 @@
             ctx.fillRect(food.x, food.y, grid, grid);
         }
 
-        function gameOver() {
+        async function gameOver() {
             running = false;
+
+            replayButton.style.display = "none";
             canvas.style.display = "none";
             scoreText.style.display = "none";
-            startScreen.style.display = "block";
-            document.getElementById("startButton").textContent = "もう一度プレイ";
+            endScreen.style.display = "block";
+            resultScore.innerHTML = "スコア:" + score;
+            if (score >= 10) {
+                if (claimed == true && await checkClaimed() == true) {
+                    resultText.style.display = "block";
+                    resultText.innerHTML = "報酬は獲得済みです";
+                } else {
+                    resultText.style.display = "block";
+                    await claimedReward();
+                }
+                claimed = true;
+            }
+            replayButton.style.display = "block";
         }
 
         // PC操作
@@ -218,6 +263,8 @@
         });
 
         document.getElementById("startButton").addEventListener("click", startGame);
+        document.getElementById("replayButton").addEventListener("click", startGame);
+
     </script>
 
 </body>

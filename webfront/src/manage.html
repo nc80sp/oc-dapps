@@ -82,7 +82,7 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", async () => {
-            await connectWallet();
+            await connectWallet(false);
         });
 
         async function getBalance() {
@@ -143,7 +143,7 @@
         async function getNFTNum() {
             try {
                 const typeId = document.getElementById("NFTMetaTypeIDNum").value;
-                const num = await getNFTNum(typeId);
+                const num = await getMintNum(typeId);
                 document.getElementById("getNFTNumResult").innerText = num;
             } catch (e) {
                 alert("エラー: " + e.message);

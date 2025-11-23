@@ -30,6 +30,8 @@ function redirectToFolder(pageId) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-    await connectWallet();
-    checkAccess();
+    let result = await connectWallet(true);
+    if (result) {
+        checkAccess();
+    }
 });
