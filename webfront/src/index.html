@@ -1,19 +1,69 @@
-<html>
+<!DOCTYPE html>
+<html lang="ja">
 
 <head>
-	<meta charset="UTF-8" />
-	<title>Top</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>シンプルサイト</title>
+	<style>
+		/* ページ全体のスタイル */
+		html,
+		body {
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+			/* スクロール禁止 */
+			height: 100%;
+			font-family: sans-serif;
+			display: flex;
+			justify-content: center;
+			text-align: center;
+			background-color: #f0f0f0;
+			color: #333;
+
+			/* スマホで文字を縮小させない */
+			-webkit-text-size-adjust: 100%;
+			/* iOS Safari */
+			-ms-text-size-adjust: 100%;
+			/* IE/Edge */
+		}
+
+		.container {
+			padding: 20px;
+			font-size: 24px;
+		}
+
+		h1 {
+			font-size: 32px;
+			/* 固定サイズ */
+		}
+
+		p {
+			font-size: 24px;
+			/* 固定サイズ */
+		}
+	</style>
 </head>
 
 <body>
-	<a href="mint/">NFT発行</a><br />
-	<a href="contents/?id=1">有料コンテンツ(1)</a><br />
-	<a href="contents/?id=2">有料コンテンツ(2)</a><br />
-	<a href="contents/?id=3">有料コンテンツ(3)</a><br />
-	<a href="contents/?id=4">有料コンテンツ(4)</a><br />
-	<a href="game/">Webゲーム</a><br />
-	<a href="quiz/">OC試験</a><br />
-	<a href="manage.html">管理者ページ</a><br />
+	<div class="container">
+		<h1>メニュー</h1>
+		<a href="mint/">NFT発行</a><br />
+		<a href="contents/?id=1">有料コンテンツ(1)</a><br />
+		<a href="contents/?id=2">有料コンテンツ(2)</a><br />
+		<a href="contents/?id=3">有料コンテンツ(3)</a><br />
+		<a href="contents/?id=4">有料コンテンツ(4)</a><br />
+		<a href="game/">Webゲーム</a><br />
+		<a href="quiz/">OC試験</a><br />
+		<a href="manage.html">管理者ページ</a><br />
+	</div>
+
+	<script>
+		// iOSでもスクロール防止
+		document.addEventListener('touchmove', function (e) {
+			e.preventDefault();
+		}, { passive: false });
+	</script>
 </body>
 
 </html>

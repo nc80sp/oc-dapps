@@ -21,6 +21,7 @@
             background: #111;
             border: 2px solid #444;
             display: none;
+            width: 95%;
         }
 
         #score {
@@ -75,8 +76,6 @@
             <h1>ゲームオーバー</h1>
             <h1 id="resultScore">スコア:10</h1><br>
             <h2 id="resultText" style="display: none;">
-                スコア10を超えたため、<br>
-                <span style="color: rgb(255, 0, 0);">0.05 SepoliaETH</span> を獲得！
             </h2>
             <button id="replayButton">もう一度プレイ</button>
         </div>
@@ -206,8 +205,9 @@
             scoreText.style.display = "none";
             endScreen.style.display = "block";
             resultScore.innerHTML = "スコア:" + score;
+            resultText.innerHTML = "報酬確認中...";
             if (score >= 10) {
-                if (claimed == true && await checkClaimed() == true) {
+                if (claimed == true || await checkClaimed() == true) {
                     resultText.style.display = "block";
                     resultText.innerHTML = "報酬は獲得済みです";
                     claimed = true;
@@ -218,6 +218,7 @@
                         resultText.innerHTML = "報酬獲得に失敗しました";
                     } else {
                         claimed = true;
+                        resultText.innerHTML = "<span style='color: rgb(255, 0, 0);'>0.05 SepoliaETH</span> を獲得！";
                     }
                 }
             }
