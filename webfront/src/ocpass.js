@@ -96,9 +96,14 @@ async function setMetadataURI(typeId, uri) {
 // NFTの発行
 async function mintNFT(typeId) {
     const tx = await contract.mintNFT(typeId,
-        { gasLimit: 500000 }
+        { gasLimit: 200000 }
     );
     await provider.waitForTransaction(tx.hash);
+    if (receipt && receipt.status === 1) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 // NFTの所持確認

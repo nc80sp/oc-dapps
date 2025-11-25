@@ -117,8 +117,12 @@
 			if (await hasNFT(NFT_TYPE.PARTICIPATION)) {
 				document.getElementById('msg').innerHTML = "参加証NFTはすでに発行済みです";
 			} else {
-				await mintNFT(NFT_TYPE.PARTICIPATION);
-				document.getElementById('msg').innerHTML = "参加証NFT を発行しました！";
+				let result = await mintNFT(NFT_TYPE.PARTICIPATION);
+				if (result) {
+					document.getElementById('msg').innerHTML = "参加証NFT を発行しました！";
+				} else {
+					document.getElementById('msg').innerHTML = "参加証NFT の発行に失敗しました。";
+				}
 			}
 		}
 	</script>
