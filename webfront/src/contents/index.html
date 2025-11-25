@@ -67,8 +67,7 @@
 
         function redirectToFolder() {
             if (!pageId) return alert("idが指定されていません。");
-            const base = window.location.origin;
-            const target = `${base}/contents/${pageId}/index.html`;
+            const target = `./${pageId}/index.html`;
             setTimeout(() => (window.location.href = target), 1500);
         }
 
