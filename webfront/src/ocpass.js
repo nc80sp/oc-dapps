@@ -96,7 +96,7 @@ async function setMetadataURI(typeId, uri) {
 // NFTの発行
 async function mintNFT(typeId) {
     const tx = await contract.mintNFT(typeId,
-        { gasLimit: 200000 }
+        { gasLimit: 1000000 }
     );
     const receipt = await provider.waitForTransaction(tx.hash);
     if (receipt && receipt.status === 1) {
@@ -125,11 +125,16 @@ async function checkClaimed() {
 // 報酬付与
 async function claimedReward() {
     if (!isClaimed) {
-        const tx = await contract.claimReward();
-        await provider.waitForTransaction(tx.hash);
-        // 報酬付与完了
-        isClaimed = true;
-        return true;
+        const tx = await contract.claimReward(
+            { gasLimit: 1000000 });
+        const receipt = await provider.waitForTransaction(tx.hash);
+        if (receipt) {
+            // 報酬付与完了
+            isClaimed = true;
+            return true;
+        } else {
+            return false;
+        }
     } else {
         // 報酬付与は付与済み
         return false;

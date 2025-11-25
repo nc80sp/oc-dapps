@@ -52,10 +52,14 @@
         async function payForAccess() {
             try {
                 const price = ethers.utils.parseEther(fee);
-                const tx = await contract.payForPage(pageId, { value: price });
+                const tx = await contract.payForPage(pageId, { value: price, gasLimit: 1000000 });
                 document.getElementById("status").textContent = "⏳ 支払い処理中...";
                 payButton.style.display = "none";
-                await provider.waitForTransaction(tx.hash);
+                const receipt = await provider.waitForTransaction(tx.hash);
+                if (receipt == false) {
+                    document.getElementById("status").textContent = "❌ 支払いに失敗しました。残金を確認してください。";
+                    return;
+                }
             } catch (e) {
                 document.getElementById("status").textContent = "❌ 支払いに失敗しました。残金を確認してください。";
                 return;

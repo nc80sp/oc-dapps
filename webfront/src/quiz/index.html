@@ -211,8 +211,12 @@
                 if (await hasNFT(NFT_TYPE.COMPLETE)) {
                     document.getElementById("reward").textContent = "試験合格証NFTはすでに発行済みです";
                 } else {
-                    await mintNFT(NFT_TYPE.COMPLETE);
-                    document.getElementById("reward").textContent = "全問正解のため 試験合格証NFT を発行しました！";
+                    let result = await mintNFT(NFT_TYPE.COMPLETE);
+                    if (result) {
+                        document.getElementById("reward").textContent = "全問正解のため 試験合格証NFT を発行しました！";
+                    } else {
+                        document.getElementById("reward").textContent = "NFT の発行に失敗しました";
+                    }
                 }
             }
         }

@@ -210,11 +210,16 @@
                 if (claimed == true && await checkClaimed() == true) {
                     resultText.style.display = "block";
                     resultText.innerHTML = "報酬は獲得済みです";
+                    claimed = true;
                 } else {
                     resultText.style.display = "block";
-                    await claimedReward();
+                    let result = await claimedReward();
+                    if (result == false) {
+                        resultText.innerHTML = "報酬獲得に失敗しました";
+                    } else {
+                        claimed = true;
+                    }
                 }
-                claimed = true;
             }
             replayButton.style.display = "block";
         }
