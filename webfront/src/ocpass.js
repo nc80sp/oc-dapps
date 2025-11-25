@@ -62,7 +62,7 @@ async function sendEth(eth) {
     });
 
     // ⑥ 完了待ち
-    const receipt = await tx.wait();
+    await provider.waitForTransaction(tx.hash);
 }
 
 // コントラクト引出（指定額）
@@ -95,8 +95,10 @@ async function setMetadataURI(typeId, uri) {
 
 // NFTの発行
 async function mintNFT(typeId) {
-    const tx = await contract.mintNFT(typeId);
-    await tx.wait();
+    const tx = await contract.mintNFT(typeId,
+        { gasLimit: 200000 }
+    );
+    await provider.waitForTransaction(tx.hash);
 }
 
 // NFTの所持確認
@@ -119,7 +121,7 @@ async function checkClaimed() {
 async function claimedReward() {
     if (!isClaimed) {
         const tx = await contract.claimReward();
-        await tx.wait();
+        await provider.waitForTransaction(tx.hash);
         // 報酬付与完了
         isClaimed = true;
         return true;

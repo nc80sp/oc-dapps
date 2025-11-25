@@ -55,7 +55,7 @@
                 const tx = await contract.payForPage(pageId, { value: price });
                 document.getElementById("status").textContent = "⏳ 支払い処理中...";
                 payButton.style.display = "none";
-                await tx.wait();
+                await provider.waitForTransaction(tx.hash);
             } catch (e) {
                 document.getElementById("status").textContent = "❌ 支払いに失敗しました。残金を確認してください。";
                 return;
