@@ -98,7 +98,7 @@ async function mintNFT(typeId) {
     const tx = await contract.mintNFT(typeId,
         { gasLimit: 200000 }
     );
-    await provider.waitForTransaction(tx.hash);
+    const receipt = await provider.waitForTransaction(tx.hash);
     if (receipt && receipt.status === 1) {
         return true;
     } else {
