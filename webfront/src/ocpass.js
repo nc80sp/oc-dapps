@@ -135,8 +135,10 @@ async function mintNFT(typeId) {
                         },
                     },
                 });
+                return true;
             }
         } catch { }
+        return false;
     }
 
     /*
