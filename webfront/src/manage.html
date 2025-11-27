@@ -70,6 +70,14 @@
         <button onclick="setMetadata()">設定する</button><br />
         <p><span id="NftMetadataResult"></span> </p>
     </div>
+    <hr class="hr1">
+    <h1>NFTのメタデータURL取得</h1>
+    <div>
+        <label>TypeID (1:参加証、2:試験合格証): </label>
+        <input id="GetMetaTypeID" type="text" placeholder="1" /><br />
+        <button onclick="getMetadata()">取得する</button><br />
+        <p><span id="GetMetadataResult"></span> </p>
+    </div>
 
     <hr class="hr1">
     <h1>NFT発行数の確認</h1>
@@ -124,6 +132,16 @@
                 const fee = document.getElementById("setPayPageFee").value;
                 await setPageFee(pageId, fee);
                 document.getElementById("setPayPageFeeResult").innerText = "設定完了";
+            } catch (e) {
+                alert("エラー: " + e.message);
+            }
+        }
+
+        async function getMetadata() {
+            try {
+                const typeId = document.getElementById("GetMetaTypeID").value;
+                let uri = await getMetadataURI(typeId);
+                document.getElementById("GetMetadataResult").innerText = uri;
             } catch (e) {
                 alert("エラー: " + e.message);
             }

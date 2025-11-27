@@ -26,6 +26,9 @@ contract OpenCampusPass is ERC721URIStorage, Ownable {
     // ページごとのアクセス権：userAddress => pageId => hasAccess
     mapping(address => mapping(uint256 => bool)) public access;
 
+    // mintイベント
+    event Minted(address indexed to, uint256 indexed tokenId, string tokenURI);
+
     // デプロイ時にオーナー設定
     constructor() ERC721("OC", "OC-Cert") Ownable(msg.sender) {}
 
@@ -40,6 +43,13 @@ contract OpenCampusPass is ERC721URIStorage, Ownable {
         metadataURI[typeId] = uri;
     }
 
+    // メタデータURLを取得
+    function getMetadataURI(
+        uint256 typeId
+    ) external view returns (string memory) {
+        return metadataURI[typeId];
+    }
+
     // NFTの発行
     function mintNFT(uint256 typeId) external {
         uint256 tokenId = _nextTokenId;
@@ -50,6 +60,9 @@ contract OpenCampusPass is ERC721URIStorage, Ownable {
         tokenType[tokenId] = typeId;
         // URI設定
         _setTokenURI(tokenId, metadataURI[typeId]);
+
+        // イベントで tokenId, URI を返す
+        emit Minted(msg.sender, tokenId, metadataURI[typeId]);
     }
 
     // 特定のNFTタイプを持っているか確認

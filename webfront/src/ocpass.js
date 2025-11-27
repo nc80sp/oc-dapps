@@ -1,6 +1,8 @@
-const CONTRACT_ADDRESS = "0x4594F930D686157e5A7927Aa06Fa3969ea267074"; // あなたのコントラクトアドレスに置き換え
+const CONTRACT_ADDRESS = "0xe951004A111d059E74E7A97F7ADD403268b586a5"; // あなたのコントラクトアドレスに置き換え
 const ABI = [
+    "event Minted(address indexed to, uint256 indexed tokenId, string tokenURI)",
     "function setMetadataURI(uint256,string memory uri) onlyOwner",
+    "function getMetadataURI(uint256 typeId) view returns(string memory)",
     "function mintNFT(uint256)",
     "function hasNFT(uint256) view returns (bool)",
     "function getMintNum(uint256) view returns (uint256)",
@@ -93,6 +95,11 @@ async function setMetadataURI(typeId, uri) {
     await contract.setMetadataURI(typeId, uri);
 }
 
+// NFTメタデータの取得
+async function getMetadataURI(typeId) {
+    await contract.getMetadataURI(typeId);
+}
+
 // NFTの発行
 async function mintNFT(typeId) {
     const tx = await contract.mintNFT(typeId,
@@ -100,6 +107,42 @@ async function mintNFT(typeId) {
     );
     const receipt = await provider.waitForTransaction(tx.hash);
     if (receipt && receipt.status === 1) {
+        // receipt.logs から解析
+        const event = receipt.logs
+            .map(log => {
+                try {
+                    return contract.interface.parseLog(log);
+                } catch {
+                    return null;
+                }
+            })
+            .find(e => e && e.name === "Minted");
+
+        if (event) {
+            const tokenId = event.args.tokenId.toString();
+            const tokenURI = event.args.tokenURI;
+            console.log(tokenURI);
+            const res = await fetch(tokenURI);
+            console.log(res);
+            const metadata = await res.json();
+            console.log(metadata);
+            const imageUrl = metadata.image;
+            console.log(imageUrl);
+
+            //NFT追加の確認ダイアログ表示（Mainnetしか自動追加されないので)
+            await window.ethereum.request({
+                method: "wallet_watchAsset",
+                params: {
+                    type: "ERC721",
+                    options: {
+                        address: CONTRACT_ADDRESS,
+                        tokenId: tokenId.toString(),
+                        image: imageUrl
+                    },
+                },
+            });
+        }
+
         return true;
     } else {
         return false;
