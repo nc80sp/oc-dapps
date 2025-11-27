@@ -183,6 +183,9 @@
         </div>
     </div>
     <script>
+        const copyBtn = document.getElementById('copyBtn');
+        const addressText = document.getElementById('contractAddress');
+        const copyMessage = document.getElementById('copyMessage');
         const container = document.getElementById('container');
         addressText.innerHTML = GetContractAddress();
         container.style.display = "none";
@@ -275,7 +278,7 @@
                 //満点の場合
                 document.getElementById("reward").textContent = "NFTの確認中...";
                 let tokenID = await hasNFT(NFT_TYPE.COMPLETE);
-                if (tokenID >= 0) {
+                if (tokenID > 0) {
                     document.getElementById("reward").textContent = "試験合格証NFTはすでに発行済みです";
                     container.style.display = "";
                     document.getElementById('tokenID').innerHTML = tokenID;

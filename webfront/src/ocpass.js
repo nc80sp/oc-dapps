@@ -101,7 +101,7 @@ async function setMetadataURI(typeId, uri) {
 
 // NFTメタデータの取得
 async function getMetadataURI(typeId) {
-    await contract.getMetadataURI(typeId);
+    return await contract.getMetadataURI(typeId);
 }
 
 // NFTの発行
