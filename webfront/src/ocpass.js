@@ -1,10 +1,10 @@
-const CONTRACT_ADDRESS = "0xe951004A111d059E74E7A97F7ADD403268b586a5"; // あなたのコントラクトアドレスに置き換え
+const CONTRACT_ADDRESS = "0xB00a017D38E6a4669761dA1EB9F1099450b6aa2c"; // あなたのコントラクトアドレスに置き換え
 const ABI = [
     "event Minted(address indexed to, uint256 indexed tokenId, string tokenURI)",
     "function setMetadataURI(uint256,string memory uri) onlyOwner",
     "function getMetadataURI(uint256 typeId) view returns(string memory)",
     "function mintNFT(uint256)",
-    "function hasNFT(uint256) view returns (bool)",
+    "function hasNFT(uint256) view returns (uint256)",
     "function getMintNum(uint256) view returns (uint256)",
     "function claimReward()",
     "function checkClaimed(address user) view returns (bool)",
@@ -23,6 +23,10 @@ const NFT_TYPE = Object.freeze({
 });
 
 let provider, signer, contract, userAddress, isClaimed = false;
+
+function GetContractAddress() {
+    return CONTRACT_ADDRESS;
+}
 
 // ウォレット接続
 async function connectWallet(checkNFT) {
@@ -106,43 +110,8 @@ async function mintNFT(typeId) {
         { gasLimit: 1000000 }
     );
 
-    const receipt = await tx.wait(); // トランザクション完了を待つ
-
-    let tokenId, tokenURI;
-    for (const log of receipt.logs) {
-        try {
-            const parsed = contract.interface.parseLog(log);
-            if (parsed.name === "Minted") {
-                tokenId = parsed.args.tokenId.toString();
-                tokenURI = parsed.args.tokenURI;
-
-                console.log(tokenURI);
-                const res = await fetch(tokenURI);
-                console.log(res);
-                const metadata = await res.json();
-                console.log(metadata);
-                const imageUrl = metadata.image;
-                console.log(imageUrl);
-                //NFT追加の確認ダイアログ表示（Mainnetしか自動追加されないので)
-                await window.ethereum.request({
-                    method: "wallet_watchAsset",
-                    params: {
-                        type: "ERC721",
-                        options: {
-                            address: CONTRACT_ADDRESS,
-                            tokenId: tokenId.toString(),
-                            image: imageUrl
-                        },
-                    },
-                });
-                return true;
-            }
-        } catch { }
-        return false;
-    }
-
-    /*
     const receipt = await provider.waitForTransaction(tx.hash);
+
     if (receipt && receipt.status === 1) {
         // receipt.logs から解析
         const event = receipt.logs
@@ -158,14 +127,15 @@ async function mintNFT(typeId) {
         if (event) {
             const tokenId = event.args.tokenId.toString();
             const tokenURI = event.args.tokenURI;
-            console.log(tokenURI);
+            return tokenId;
+
+            /*
             const res = await fetch(tokenURI);
             console.log(res);
             const metadata = await res.json();
             console.log(metadata);
             const imageUrl = metadata.image;
             console.log(imageUrl);
-
             //NFT追加の確認ダイアログ表示（Mainnetしか自動追加されないので)
             await window.ethereum.request({
                 method: "wallet_watchAsset",
@@ -178,13 +148,10 @@ async function mintNFT(typeId) {
                     },
                 },
             });
+            */
         }
-
-        return true;
-    } else {
-        return false;
     }
-    */
+    return 0;
 }
 
 // NFTの所持確認

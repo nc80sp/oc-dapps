@@ -18,12 +18,6 @@
 			margin-bottom: 8px
 		}
 
-		.container {
-			display: flex;
-			gap: 20px;
-			align-items: flex-start
-		}
-
 		.left {
 			width: 420px
 		}
@@ -91,6 +85,55 @@
 			display: flex;
 			gap: 8px
 		}
+
+
+		.container {
+			display: flex;
+			justify-content: center;
+			/* 横方向中央 */
+			flex-direction: column;
+			align-items: center;
+		}
+
+		.address-container {
+			display: flex;
+			align-items: center;
+			background: #f0f0f0;
+			padding: 1rem;
+			border-radius: 10px;
+			margin-bottom: 1rem;
+			width: 100%;
+			max-width: 400px;
+			word-break: break-all;
+			justify-content: space-between;
+			text-align: center;
+		}
+
+		.address-text {
+			font-size: 1rem;
+			color: #333;
+		}
+
+		.copy-btn {
+			background: #4CAF50;
+			color: white;
+			border: none;
+			border-radius: 5px;
+			padding: 0.5rem 1rem;
+			font-size: 0.9rem;
+			cursor: pointer;
+			white-space: nowrap;
+		}
+
+		.copy-btn:active {
+			background: #45a049;
+		}
+
+		.message {
+			font-size: 0.9rem;
+			color: #4CAF50;
+			min-height: 1.2rem;
+		}
 	</style>
 </head>
 
@@ -100,10 +143,40 @@
 		<button id="mint" style="margin-top:20px; font-size:20px; padding:10px 30px;">🎉 参加証NFT を発行する</button>
 		<p id="msg" style="text-align: center;"></p>
 	</div>
+	<div class="container" id="container">
+		<div class="address-container">
+			<span style="color:black;white-space: nowrap;"><b>[アドレス]</b></span>
+			<span class="address-text" id="contractAddress"></span>
+			<button class="copy-btn" id="copyBtn">コピー</button>
+		</div>
+		<div class="message" id="copyMessage"></div>
+		<br>
+		<div class="address-container">
+			<span style="color:black;white-space: nowrap;"><B>[ID]</B></span>
+			<span class="address-text" id="tokenID"></span>
+		</div>
+	</div>
 
 	<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 	<script src="../ocpass.js"></script>
 	<script>
+		const copyBtn = document.getElementById('copyBtn');
+		const addressText = document.getElementById('contractAddress');
+		const copyMessage = document.getElementById('copyMessage');
+		const container = document.getElementById('container');
+		addressText.innerHTML = GetContractAddress();
+		container.style.display = "none";
+
+		copyBtn.addEventListener('click', async () => {
+			try {
+				await navigator.clipboard.writeText(addressText.textContent);
+				copyMessage.textContent = 'コピーしました！';
+				setTimeout(() => copyMessage.textContent = '', 2000);
+			} catch (err) {
+				copyMessage.textContent = 'コピーに失敗しました';
+			}
+		});
+
 		document.getElementById('mint').addEventListener('click', clickMint);
 
 		async function clickMint() {
@@ -114,14 +187,19 @@
 				document.getElementById('msg').innerHTML = "接続に失敗しました";
 				return;
 			}
-			if (await hasNFT(NFT_TYPE.PARTICIPATION)) {
+			let tokenID = await hasNFT(NFT_TYPE.PARTICIPATION);
+			if (tokenID > 0) {
+				container.style.display = "";
 				document.getElementById('msg').innerHTML = "参加証NFTはすでに発行済みです";
+				document.getElementById('tokenID').innerHTML = tokenID;
 			} else {
-				let result = await mintNFT(NFT_TYPE.PARTICIPATION);
-				if (result) {
-					document.getElementById('msg').innerHTML = "参加証NFT を発行しました！";
-				} else {
+				tokenID = await mintNFT(NFT_TYPE.PARTICIPATION);
+				if (tokenID == 0) {
 					document.getElementById('msg').innerHTML = "参加証NFT の発行に失敗しました。";
+				} else {
+					container.style.display = "";
+					document.getElementById('msg').innerHTML = "参加証NFT を発行しました！";
+					document.getElementById('tokenID').innerHTML = tokenID;
 				}
 			}
 		}

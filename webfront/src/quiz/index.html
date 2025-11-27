@@ -100,6 +100,54 @@
             color: #00eaff;
             text-shadow: 0 0 15px #00eaff;
         }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            /* 横方向中央 */
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .address-container {
+            display: flex;
+            align-items: center;
+            background: #f0f0f0;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            width: 100%;
+            max-width: 400px;
+            word-break: break-all;
+            justify-content: space-between;
+            text-align: center;
+        }
+
+        .address-text {
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .copy-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .copy-btn:active {
+            background: #45a049;
+        }
+
+        .message {
+            font-size: 0.9rem;
+            color: #4CAF50;
+            min-height: 1.2rem;
+        }
     </style>
 </head>
 
@@ -119,8 +167,26 @@
 
         <div id="result"></div>
         <div id="reward"></div>
+
+        <div class="container" id="container">
+            <div class="address-container">
+                <span style="color:black;white-space: nowrap;"><B>[アドレス]</B></span>
+                <span class="address-text" id="contractAddress"></span>
+                <button class="copy-btn" id="copyBtn">コピー</button>
+            </div>
+            <div class="message" id="copyMessage"></div>
+            <br>
+            <div class="address-container">
+                <span style="color:black;white-space: nowrap;"><B>[ID]</B></span>
+                <span class="address-text" id="tokenID"></span>
+            </div>
+        </div>
     </div>
     <script>
+        const container = document.getElementById('container');
+        addressText.innerHTML = GetContractAddress();
+        container.style.display = "none";
+
         async function connect() {
             let result = await connectWallet(true);
             if (!result) {
@@ -208,12 +274,17 @@
             if (quizzes.length <= score) {
                 //満点の場合
                 document.getElementById("reward").textContent = "NFTの確認中...";
-                if (await hasNFT(NFT_TYPE.COMPLETE)) {
+                let tokenID = await hasNFT(NFT_TYPE.COMPLETE);
+                if (tokenID >= 0) {
                     document.getElementById("reward").textContent = "試験合格証NFTはすでに発行済みです";
+                    container.style.display = "";
+                    document.getElementById('tokenID').innerHTML = tokenID;
                 } else {
-                    let result = await mintNFT(NFT_TYPE.COMPLETE);
-                    if (result) {
+                    tokenID = await mintNFT(NFT_TYPE.COMPLETE);
+                    if (tokenID == 0) {
                         document.getElementById("reward").textContent = "全問正解のため 試験合格証NFT を発行しました！";
+                        container.style.display = "";
+                        document.getElementById('tokenID').innerHTML = tokenID;
                     } else {
                         document.getElementById("reward").textContent = "NFT の発行に失敗しました";
                     }
