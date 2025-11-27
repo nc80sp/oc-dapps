@@ -190,6 +190,15 @@
         addressText.innerHTML = GetContractAddress();
         container.style.display = "none";
 
+        copyBtn.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(addressText.textContent);
+                copyMessage.textContent = 'コピーしました！';
+                setTimeout(() => copyMessage.textContent = '', 2000);
+            } catch (err) {
+                copyMessage.textContent = 'コピーに失敗しました';
+            }
+        });
         async function connect() {
             let result = await connectWallet(true);
             if (!result) {
