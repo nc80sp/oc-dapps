@@ -105,6 +105,41 @@ async function mintNFT(typeId) {
     const tx = await contract.mintNFT(typeId,
         { gasLimit: 1000000 }
     );
+
+    const receipt = await tx.wait(); // トランザクション完了を待つ
+
+    let tokenId, tokenURI;
+    for (const log of receipt.logs) {
+        try {
+            const parsed = contract.interface.parseLog(log);
+            if (parsed.name === "Minted") {
+                tokenId = parsed.args.tokenId.toString();
+                tokenURI = parsed.args.tokenURI;
+
+                console.log(tokenURI);
+                const res = await fetch(tokenURI);
+                console.log(res);
+                const metadata = await res.json();
+                console.log(metadata);
+                const imageUrl = metadata.image;
+                console.log(imageUrl);
+                //NFT追加の確認ダイアログ表示（Mainnetしか自動追加されないので)
+                await window.ethereum.request({
+                    method: "wallet_watchAsset",
+                    params: {
+                        type: "ERC721",
+                        options: {
+                            address: CONTRACT_ADDRESS,
+                            tokenId: tokenId.toString(),
+                            image: imageUrl
+                        },
+                    },
+                });
+            }
+        } catch { }
+    }
+
+    /*
     const receipt = await provider.waitForTransaction(tx.hash);
     if (receipt && receipt.status === 1) {
         // receipt.logs から解析
@@ -147,6 +182,7 @@ async function mintNFT(typeId) {
     } else {
         return false;
     }
+    */
 }
 
 // NFTの所持確認
